@@ -1,42 +1,26 @@
-import java.util.*; 
-import java.io.*; 
+import java.util.PriorityQueue;
+
 public class Elevator {
+    private int floorCount;
+    private int elevatorCapacity;
+    private int numberOfElevators;
+    private PriorityQueue<Person> upQueue;
+    private PriorityQueue<Person> downQueue;
 
-    public void passangerApears() {
-        
-        
-
-
-        
+    public Elevator(int floorCount, int elevatorCapacity, int numberOfElevators) {
+        this.floorCount = floorCount;
+        this.elevatorCapacity = elevatorCapacity;
+        this.numberOfElevators = numberOfElevators;
     }
 
-
-    public static void main(String[] args) throws IOException{
-        
-        Person person1 = new Person("Bob", 11, 25, true);
-
-        int floorCount = 32;
-        double passangerApears = 0.03;
-        int numberOfElevators = 1;
-        int elevatorCapacity = 10;
-        int ticks = 500;
-
-        Queue<Integer>[] floors = new Queue[floorCount];
-        for (int i = 0; i < floorCount; i++) {
-            floors[i] = new LinkedList<>();
-        }
-        floors[0].offer(1);
-
-
-        for(int i = 0; i < ticks; i++){
-
-        }
-
-
-
-
+    public void addPerson(Person person) {
+        // Logic to add a person to the appropriate queue
     }
-    
 
+    public Person getNextPerson(int currentFloor, boolean goingUp) {
+        // Logic to get the next person based on direction
+        return null; // Replace with actual logic
+    }
 
+    // Other methods and logic for elevator operation
 }
