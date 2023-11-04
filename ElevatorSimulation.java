@@ -3,14 +3,15 @@ import java.io.*;
 
 public class ElevatorSimulation {
     static int floorCount = 32;
-    double passangerApears = 0.03;
-    int numberOfElevators = 1;
-    int elevatorCapacity = 10;
+    static double passangerApears = 0.03;
+    static int numberOfElevators = 1;
+    static int elevatorCapacity = 10;
     static int ticks = 500;
+    static int curFloor = 1;
 
     private static Queue<Person>[] floors;
 
-    public void passangers() {
+    public static void passangers() {
         Random random = new Random();
         double chancePersonApears = random.nextDouble();
         int destFloor;
@@ -35,9 +36,19 @@ public class ElevatorSimulation {
         for (int i = 0; i < floorCount; i++) {
             floors[i] = new LinkedList<>();
         } 
+        Elevator elevator = new Elevator(floorCount, elevatorCapacity, numberOfElevators);
+
 
         for (int i = 0; i < ticks; i++) {
+            passangers();
+            System.out.println("Current Floor" + curFloor);
             
+            //get people from current floor who are going in same direction
+            //move up 5 floors checking for people who are going up too
+            //once all up passangers are gone go to next person in queue
+            //
+
+
         }
     }
 }
