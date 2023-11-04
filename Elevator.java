@@ -1,26 +1,50 @@
-import java.util.PriorityQueue;
+import java.util.LinkedList;
+import java.util.Queue;
 
-public class Elevator {
-    private int floorCount;
-    private int elevatorCapacity;
-    private int numberOfElevators;
-    private PriorityQueue<Person> upQueue;
-    private PriorityQueue<Person> downQueue;
+class Elevator {
+    private int currentFloor;
+    private int destinationFloor;
+    private boolean isMovingUp;
+    private Queue<Integer> passengers;
 
-    public Elevator(int floorCount, int elevatorCapacity, int numberOfElevators) {
-        this.floorCount = floorCount;
-        this.elevatorCapacity = elevatorCapacity;
-        this.numberOfElevators = numberOfElevators;
+    public Elevator() {
+        currentFloor = 1;
+        destinationFloor = 1;
+        isMovingUp = true;
+        passengers = new LinkedList<>();
     }
 
-    public void addPerson(Person person) {
-        // Logic to add a person to the appropriate queue
+    public int getCurrentFloor() {
+        return currentFloor;
     }
 
-    public Person getNextPerson(int currentFloor, boolean goingUp) {
-        // Logic to get the next person based on direction
-        return null; // Replace with actual logic
+    public void move() {
+        if (isMovingUp) {
+            if (currentFloor < 32) {
+                currentFloor += 5;
+            }
+        } else {
+            if (currentFloor > 1) {
+                currentFloor -= 5;
+            }
+        }
+        if (currentFloor == destinationFloor) {
+            passengers.poll();
+        }
     }
 
-    // Other methods and logic for elevator operation
+     public void addPassenger(int destination) {
+        if (passengers.size() < 10) {
+            passengers.offer(destination);
+        }
+    }
+
+    public void setDestination(int floor) {
+        destinationFloor = floor;
+        isMovingUp = floor > currentFloor;
+    }
+
+    public boolean hasSpace() {
+        return passengers.size() < 10;
+    }
 }
