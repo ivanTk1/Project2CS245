@@ -13,17 +13,6 @@ class Building {
         for (int i = 0; i < numElevators; i++) {
             elevators[i] = new Elevator(elevatorCapacity);
         }
-
-        people = new LinkedList<>();
-        this.passengerProbability = passengerProbability;
-        // Initialize people on random floors
-        Random random = new Random();
-        for (int i = 0; i < numFloors; i++) {
-            if (random.nextDouble() < passengerProbability) {
-                int destination = random.nextInt(numFloors) + 1;
-                people.add(new Person("Person" + i, i + 1, destination, true));
-            }
-        }
     }
 
 
