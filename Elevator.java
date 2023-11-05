@@ -5,16 +5,23 @@ class Elevator {
     private int currentFloor;
     private int destinationFloor;
     private boolean isMovingUp;
-    private Queue<Integer> passengers;
+    private Queue<Person> passengers;
+    private int capacity;
 
-    public Elevator() {
+    public Elevator(int capacity) {
         currentFloor = 1;
         destinationFloor = 1;
         isMovingUp = true;
         passengers = new LinkedList<>();
+        this.capacity = capacity;
     }
 
+
     public int getCurrentFloor() {
+        return currentFloor;
+    }
+
+    public int getDestinationFloor() {
         return currentFloor;
     }
 
@@ -33,11 +40,12 @@ class Elevator {
         }
     }
 
-     public void addPassenger(int destination) {
-        if (passengers.size() < 10) {
-            passengers.offer(destination);
+    public void addPassenger(Person person) {
+        if (passengers.size() < getCapacity()) {
+            passengers.offer(person);
         }
     }
+    
 
     public void setDestination(int floor) {
         destinationFloor = floor;
@@ -45,6 +53,10 @@ class Elevator {
     }
 
     public boolean hasSpace() {
-        return passengers.size() < 10;
+        return passengers.size() < capacity;
+    }
+
+    public int getCapacity() {
+        return capacity;
     }
 }
