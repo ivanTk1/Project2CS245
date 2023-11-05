@@ -1,54 +1,31 @@
-import java.util.*;
-import java.io.*;
+import java.util.LinkedList;
+import java.util.Queue;
+import java.util.Random;
+import java.util.List;
 
 public class ElevatorSimulation {
-    static int floorCount = 32;
-    static double passangerApears = 0.03;
-    static int numberOfElevators = 1;
-    static int elevatorCapacity = 10;
-    static int ticks = 500;
-    static int curFloor = 1;
+    public static int NUM_FLOORS = 32;
+    public static double PASSENGER_PROBABILITY = 0.03;
+    public static int NUM_ELEVATORS = 3;
+    public static int ELEVATOR_CAPACITY = 10;
+    public static int TICKS = 100;
 
-    private static Queue<Person>[] floors;
+    public static void main(String[] args) {
+        Building building = new Building(NUM_FLOORS, NUM_ELEVATORS, ELEVATOR_CAPACITY, TICKS, PASSENGER_PROBABILITY);
+        int tick = 0;
 
-    public static void passangers() {
-        Random random = new Random();
-        double chancePersonApears = random.nextDouble();
-        int destFloor;
-        int count = 1;
-    
-        for(int i = 0; i < floorCount; i++){
-            if (chancePersonApears < passangerApears) {
-                do {
-                    destFloor = random.nextInt(floorCount);
-                } while (destFloor == i);
-                Person person = new Person("Passanger" + count, i, destFloor, true);
-                floors[i].offer(person); 
-    
-                count++;
-            } 
-        }
-    }
-    
-    public static void main(String[] args) throws IOException {
+        while (tick < TICKS) {
+            building.simulateTick();
+            // Request elevators here as needed
 
-        floors = new Queue[floorCount];
-        for (int i = 0; i < floorCount; i++) {
-            floors[i] = new LinkedList<>();
-        } 
-        Elevator elevator = new Elevator(floorCount, elevatorCapacity, numberOfElevators);
+            // Print elevator states
+            for (int i = 0; i < building.elevators.length; i++) {
+                Elevator elevator = building.elevators[i];
+                System.out.println("Elevator " + i + ": Current Floor - " + elevator.getCurrentFloor()
+                        + ", Destination Floor - " + elevator.getDestinationFloor());
+            }
 
-
-        for (int i = 0; i < ticks; i++) {
-            passangers();
-            System.out.println("Current Floor" + curFloor);
-            
-            //get people from current floor who are going in same direction
-            //move up 5 floors checking for people who are going up too
-            //once all up passangers are gone go to next person in queue
-            //
-
-
+            tick++;
         }
     }
 }
