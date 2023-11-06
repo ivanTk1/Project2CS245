@@ -1,31 +1,60 @@
-import java.util.LinkedList;
-import java.util.Queue;
-import java.util.Random;
-import java.util.List;
+import java.util.*;
+import java.io.*;
 
 public class ElevatorSimulation {
-    public static int NUM_FLOORS = 32;
-    public static double PASSENGER_PROBABILITY = 0.03;
-    public static int NUM_ELEVATORS = 3;
-    public static int ELEVATOR_CAPACITY = 10;
-    public static int TICKS = 100;
+    static int floorCount = 32;
+    static double passengerAppears = 0.03;
+    int numberOfElevators = 1;
+    int elevatorCapacity = 10;
+    static int ticks = 500;
+    static int count = 0;
+
+    // Initialize goingUp and goingDown at the class level
+    private static PriorityQueue<Person> goingDown = new PriorityQueue<>(new Comparator<Person>() {
+        @Override
+        public int compare(Person person1, Person person2) {
+            // Compare based on curFloor in descending order
+            return Integer.compare(person2.getCurFloor(), person1.getCurFloor());
+        }
+    });
+
+    private static PriorityQueue<Person> goingUp = new PriorityQueue<>(new Comparator<Person>() {
+        @Override
+        public int compare(Person person1, Person person2) {
+            // Compare based on curFloor in ascending order
+            return Integer.compare(person1.getCurFloor(), person2.getCurFloor());
+        }
+    });
+
+    public static void createPeople() {
+        Random random = new Random();
+
+        for (int i = 0; i < floorCount; i++) {
+            double randomValue = random.nextDouble();
+            if (randomValue < passengerAppears) {
+                int destFloor = random.nextInt(floorCount);
+                if (randomValue >= i) {
+                    randomValue++;
+                }
+                Person passenger = new Person("passenger" + count, i, destFloor, true);
+                System.out.println(passenger.getName() + " is waiting on floor " + passenger.getCurFloor() + " going to " + passenger.getDestFloor());
+                count++;
+                // Adds passengers to the correct direction
+                if (passenger.getCurFloor() > passenger.getDestFloor()) {
+                    goingDown.add(passenger);
+                } else if (passenger.getCurFloor() < passenger.getDestFloor()) {
+                    goingUp.add(passenger);
+                } else {
+                    System.out.println("SOMETHING WENT WRONG ADDING PASSENGERS TO HEAP");
+                    System.exit(0);
+                }
+            }
+        }
+    }
 
     public static void main(String[] args) {
-        Building building = new Building(NUM_FLOORS, NUM_ELEVATORS, ELEVATOR_CAPACITY, TICKS, PASSENGER_PROBABILITY);
-        int tick = 0;
-
-        while (tick < TICKS) {
-            building.simulateTick();
-            // Request elevators here as needed
-
-            // Print elevator states
-            for (int i = 0; i < building.elevators.length; i++) {
-                Elevator elevator = building.elevators[i];
-                System.out.println("Elevator " + i + ": Current Floor - " + elevator.getCurrentFloor()
-                        + ", Destination Floor - " + elevator.getDestinationFloor());
-            }
-
-            tick++;
+        for (int i = 0; i < ticks; i++) {
+            createPeople();
         }
     }
 }
