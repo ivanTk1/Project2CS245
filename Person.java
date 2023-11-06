@@ -42,4 +42,13 @@ class Person {
     public void setWaiting(boolean waiting) {
         this.waiting = waiting;
     }
+    @Override
+    public String toString() {
+        return "Person{" +
+                "name='" + name + '\'' +
+                ", curFloor=" + curFloor +
+                ", destFloor=" + destFloor +
+                ", waiting=" + waiting +
+                '}';
+    }
 }
