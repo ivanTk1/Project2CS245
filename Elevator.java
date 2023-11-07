@@ -1,57 +1,83 @@
-import java.util.Arrays;
-import java.util.Queue;
-import java.util.LinkedList;
-import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
-
-
+import java.util.PriorityQueue;
 
 public class Elevator {
     private String name;
     private int curFloor;
     private int destFloor;
+    private boolean isEmpty = true;
     private static boolean upOrDown;
-    private List<Person> passengerList;
-    private Queue<Person> nextInLine;
+    private static PriorityQueue<Person> minHeapGoingUp = new PriorityQueue<>(Comparator.comparing(Person::getCurFloor));
+    private static PriorityQueue<Person> maxHeapGoingDown = new PriorityQueue<>(Comparator.comparing(Person::getCurFloor).reversed());
 
+    private int passengerCount = 0;
 
-    public Elevator(String name, int curFloor, int destFloor, boolean upOrDown, Person[] passengerList) {
+    // Initialize goingUp and goingDown at the class level
+   
+    public Elevator(String name, int curFloor, int destFloor, boolean upOrDown) {
         this.name = name;
         this.curFloor = curFloor;
         this.destFloor = destFloor;
         this.upOrDown = upOrDown;
-        this.passengerList = new ArrayList<>();;
-        this.nextInLine = new LinkedList<>();
-
     }
 
-    public void enqueueString(Person value) {
-        nextInLine.offer(value);
+    public Person peekNextPersonInUpHeap() {
+        if (upOrDown) {
+            return minHeapGoingUp.peek();
+        }
+        return null; // The elevator is not going up
     }
+    
+    public Person peekNextPersonInDownHeap() {
+        if (!upOrDown) {
+            return maxHeapGoingDown.peek();
+        }
+        return null; // The elevator is not going down
+    }
+    
 
-    public Person dequeueString() {
-        return nextInLine.poll();
-    }
+    public boolean inAction() {
+        if (destFloor == curFloor && isEmpty) {
+            return false;
+        }
+        return true;
+    }    
 
-    public Person peekNextString() {
-        return nextInLine.peek();
+    public void addPassenger(Person passenger) {
+        if (upOrDown) {
+            minHeapGoingUp.add(passenger);
+        } else {
+            maxHeapGoingDown.add(passenger);
+        }
+        isEmpty = false; // Elevator is not empty when passengers are added
+        passengerCount++;
     }
-
-    public int getQueueSize() {
-        return nextInLine.size();
+    
+    
+    public Person getNextPassenger() {
+        if (upOrDown) {
+            if (!minHeapGoingUp.isEmpty()) {
+                Person passenger = minHeapGoingUp.poll();
+                if (minHeapGoingUp.isEmpty()) {
+                    isEmpty = true; // Elevator is empty when no passengers are left
+                }
+                passengerCount--;
+                return passenger;
+            }
+        } else {
+            if (!maxHeapGoingDown.isEmpty()) {
+                Person passenger = maxHeapGoingDown.poll();
+                if (maxHeapGoingDown.isEmpty()) {
+                    isEmpty = true; // Elevator is empty when no passengers are left
+                }
+                passengerCount--;
+                return passenger;
+            }
+        }
+        return null; // No passenger to pick up
     }
-
-    public void addPassenger(Person person) {
-        passengerList.add(person);
-    }
-
-    public void removePassenger(Person person) {
-        passengerList.remove(person);
-    }
-
-    public static List<Person> getPassengerList() {
-        return passengerList;
-    }
+    
 
     // Getters
     public String getName() {
@@ -70,6 +96,10 @@ public class Elevator {
         return upOrDown;
     }
 
+    public int getPassengerCount() {
+        return passengerCount;
+    }
+
     // Setters
     public void setName(String name) {
         this.name = name;
@@ -84,7 +114,7 @@ public class Elevator {
     }
 
     public void setUpOrDown(boolean upOrDown) {
-        this.upOrDown = upOrDown;
+        Elevator.upOrDown = upOrDown;
     }
 
     @Override
@@ -93,9 +123,6 @@ public class Elevator {
                 "name='" + name + '\'' +
                 ", curFloor=" + curFloor +
                 ", destFloor=" + destFloor +
-                ", upOrDown=" + upOrDown +
-                ", passengerList=" + passengerList +
-                ", nextInLine=" + nextInLine +
-                '}';
+                ", upOrDown=" + upOrDown + '}';
     }
 }
