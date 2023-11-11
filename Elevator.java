@@ -6,7 +6,7 @@ public class Elevator {
     private int curFloor;
     private int destFloor;
     private boolean isEmpty = true;
-    private static boolean upOrDown;
+    private static int action;
     private static PriorityQueue<Person> minHeapGoingUp = new PriorityQueue<>(Comparator.comparing(Person::getCurFloor));
     private static PriorityQueue<Person> maxHeapGoingDown = new PriorityQueue<>(Comparator.comparing(Person::getCurFloor).reversed());
 
@@ -15,38 +15,38 @@ public class Elevator {
 
     // Initialize goingUp and goingDown at the class level
 
-    public Elevator(String name, int curFloor, int destFloor, boolean upOrDown, int maxCapacity) {
+    public Elevator(String name, int curFloor, int destFloor, int  action, int maxCapacity) {
         this.name = name;
         this.curFloor = curFloor;
         this.destFloor = destFloor;
-        this.upOrDown = upOrDown;
+        this.action = action;
         this.maxCapacity = maxCapacity;
     }
-    public void updateDirection(boolean newDirection) {
-        upOrDown = newDirection;
+    public void updateDirection(int newDirection) {
+        action = newDirection;
     }
 
-
     public Person peekNextPersonInUpHeap() {
-        if (upOrDown) {
+        if (action == 1) {
             return minHeapGoingUp.peek();
         }
         return null; // The elevator is not going up
     }
 
     public Person peekNextPersonInDownHeap() {
-        if (!upOrDown) {
+        if (action == -1) {
             return maxHeapGoingDown.peek();
         }
         return null; // The elevator is not going down
     }
 
     public boolean inAction() {
-        if (destFloor == curFloor && isEmpty) {
+        if(action == 0){
             return false;
         }
         return true;
     }
+    
 
     public void addPassenger(Person passenger) {
         if (passengerCount < maxCapacity) {
@@ -77,7 +77,7 @@ public class Elevator {
     public void printPassengers() {
         System.out.println("Passengers in " + name + ":");
 
-        if (upOrDown) {
+        if (action == 1) {
             System.out.println("Going Up:");
             for (Person passenger : minHeapGoingUp) {
                 System.out.println(passenger);
@@ -94,7 +94,7 @@ public class Elevator {
 
     public Person removePassenger() {
         Person nextPassenger = null;
-        if (upOrDown) {
+        if (action == 1) {
             if (!minHeapGoingUp.isEmpty()) {
                 nextPassenger = minHeapGoingUp.poll();
                 if (minHeapGoingUp.isEmpty()) {
@@ -109,36 +109,30 @@ public class Elevator {
                 }
             }
         }
-    
+
         if (nextPassenger != null) {
-            updateDestinationAfterRemoval();
+            destFloor = nextPassenger.getDestFloor();
             passengerCount--;
+         //   System.out.println(passengerCount + "     " +  destFloor);
+         //   System.out.println(isEmpty);
+            updateDirection(); // Update the direction after removing a passenger
         }
-    
+
         return nextPassenger;
     }
-    
-    private void updateDestinationAfterRemoval() {
-        if (upOrDown) {
-            if (!minHeapGoingUp.isEmpty()) {
-                destFloor = minHeapGoingUp.peek().getDestFloor();
-            }
-        } else {
-            if (!maxHeapGoingDown.isEmpty()) {
-                destFloor = maxHeapGoingDown.peek().getDestFloor();
-            }
-        }
-        updateDirection(); // Update the direction after removing a passenger
-    }
-    
 
     private void updateDirection() {
-        if (!minHeapGoingUp.isEmpty() && (maxHeapGoingDown.isEmpty() || minHeapGoingUp.peek().getDestFloor() <= maxHeapGoingDown.peek().getCurFloor())) {
-            upOrDown = true; // Set direction to going up
-        } else if (!maxHeapGoingDown.isEmpty() && (minHeapGoingUp.isEmpty() || maxHeapGoingDown.peek().getDestFloor() >= minHeapGoingUp.peek().getCurFloor())) {
-            upOrDown = false; // Set direction to going down
+        if (!minHeapGoingUp.isEmpty() && minHeapGoingUp.peek().getDestFloor() > curFloor) {
+            action = 1; // Set direction to going up
+        } else if (!maxHeapGoingDown.isEmpty() && maxHeapGoingDown.peek().getDestFloor() < curFloor) {
+            action = -1; // Set direction to going down
+        } else {
+            // If both heaps are empty or no passenger is going in the current direction,
+            // set the direction based on the destination floor of the next passenger
+            action = 0;
         }
     }
+    
 
     
 
@@ -155,8 +149,8 @@ public class Elevator {
         return destFloor;
     }
 
-    public static boolean isUpOrDown() {
-        return upOrDown;
+    public static int isAction() {
+        return action;
     }
 
     public int getPassengerCount() {
@@ -185,8 +179,8 @@ public class Elevator {
         return isEmpty;
     }
 
-    public void setUpOrDown(boolean upOrDown) {
-        Elevator.upOrDown = upOrDown;
+    public void setAction(int action) {
+        this.action = action;
     }
 
     @Override
@@ -195,6 +189,6 @@ public class Elevator {
                 "name='" + name + '\'' +
                 ", curFloor=" + curFloor +
                 ", destFloor=" + destFloor +
-                ", upOrDown=" + upOrDown + '}';
+                ", upOrDown=" + action + '}';
     }
 }
