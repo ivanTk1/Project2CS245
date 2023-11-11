@@ -1,11 +1,11 @@
 import java.util.*;
 
 public class ElevatorSimulation {
-    static int floorCount = 32;
-    static double passengerAppears = 0.002;
+    static int floorCount = 10;
+    static double passengerAppears = 0.2;
     static int numberOfElevators = 1;
     static int elevatorCapacity = 10;
-    static int ticks = 100;
+    static int ticks = 10;
     static int count = 0;
 
     static Queue<Person>[] floorsQueues;
@@ -68,8 +68,14 @@ public class ElevatorSimulation {
         if (closestPassenger != null) {
             closestPassenger.setWaiting(false);
             elevator.setDestFloor(closestPassenger.getCurFloor());
-            
+        
             System.out.println(elevator.getName() + " is empty and going to pick up " + closestPassenger.getName() + " on floor " + elevator.getDestFloor());
+        
+            if (elevator.getDestFloor() > elevator.getCurFloor()) {
+                elevator.updateDirection(2);
+            } else if (elevator.getDestFloor() < elevator.getCurFloor()) {
+                elevator.updateDirection(-2);
+            }
         }
     }
 
@@ -91,38 +97,30 @@ public class ElevatorSimulation {
     }
 
     public static void pickUp(Elevator elevator) {
-        if (elevator.isUpOrDown() || elevator.isEmpty()) { // going up
-            //System.out.println("IS EMPTY 1 " + elevator.isEmpty());
-
+        int action = elevator.isAction();
+        System.out.println(action);
+        if (action == 1 || action == 2 || action == -2) { // Going up
             if (!floorsQueues[elevator.getCurFloor() * 2].isEmpty()) {
                 while (elevator.getPassengerCount() < elevatorCapacity && !floorsQueues[elevator.getCurFloor() * 2].isEmpty()) {
                     Person person = floorsQueues[elevator.getCurFloor() * 2].poll();
                     System.out.println(elevator.getName() + " picked up " + person.getName());
                     elevator.addPassenger(person);
                 }
-                //elevator.printPassengers();
             }
         } 
-         if (!elevator.isUpOrDown() || elevator.isEmpty()) { // going down
-            // System.out.println("IS EMPTY 2 " + elevator.isEmpty());
-
+        if (action == -1 || action == -2 || action == 2) { // Going down
             if (!floorsQueues[elevator.getCurFloor() * 2 + 1].isEmpty()) {
-
                 while (elevator.getPassengerCount() < elevatorCapacity && !floorsQueues[elevator.getCurFloor() * 2 + 1].isEmpty()) {
                     Person person = floorsQueues[elevator.getCurFloor() * 2 + 1].poll();
                     System.out.println(elevator.getName() + " picked up " + person.getName());
                     elevator.addPassenger(person);
                 }
             }
-          //  elevator.printPassengers();
         }
-    
-      //  System.out.println("DEST FLOOR = " + elevator.getDestFloor());
-      //  System.out.println(" IS UP OR DOWN " + elevator.isUpOrDown());
-      //  System.out.println(" IS IN ACTION " + elevator.inAction());
-      //  elevator.printPassengers();
     }
+    
 
+    
     public static void main(String[] args) {
         // makes all the "floors" even is up/odd is down
         floorsQueues = new Queue[floorCount * 2];
@@ -134,38 +132,60 @@ public class ElevatorSimulation {
         List<Elevator> elevators = new ArrayList<>();
 
         for (int j = 0; j < numberOfElevators; j++) {
-            Elevator elevator = new Elevator("elevator" + j, 0, 0, true, elevatorCapacity);
+            Elevator elevator = new Elevator("elevator" + j, 0, 0, 0, elevatorCapacity);
             elevators.add(elevator);
         }
 
+        Person person1 = new Person("passenger1", 1, 0, true);
+        Person person2 = new Person("passenger2", 2, 8, true);
+        Person person3 = new Person("passenger2", 9, 3, true);
+
+        // Add the created people to the queues
+        floorsQueues[1 * 2 + 1].offer(person1);  // 
+        floorsQueues[2 * 2].offer(person2);  // Add to the up 
+        floorsQueues[9 * 2 + 1].offer(person3);  // Add to the up 
+
+
+
+
+
         for (int i = 0; i < ticks; i++) {
-            createPeople();
-
-            for (Elevator elevator : elevators) {
-
-                pickUp(elevator);
-                dropOff(elevator);
-                if (!elevator.inAction()) {
-                    //System.out.println(elevator.isEmpty());
-                    locateNewPassenger(elevator);
-                    if(elevator.getDestFloor()>elevator.getCurFloor()){
-                        elevator.updateDirection(true);
-                    }
-                    if(elevator.getDestFloor()<elevator.getCurFloor()){
-                        elevator.updateDirection(false);
-                    }
-                }
-                //elevator.printPassengers();
-                if (elevator.inAction()) {
-                    if (elevator.isUpOrDown() && elevator.getCurFloor() < floorCount - 1) {
-                        elevator.setCurFloor(elevator.getCurFloor() + 1);
-                    } else if (!elevator.isUpOrDown() && elevator.getCurFloor() > 0) {
-                        elevator.setCurFloor(elevator.getCurFloor() - 1);
+           // createPeople();
+            for(int j = 0; j < 5; j++){
+                for (Elevator elevator : elevators) {
+                    dropOff(elevator);
+                    pickUp(elevator);
+                  //  System.out.println(elevator.inAction());
+                  //  System.out.println(elevator.getPassengerCount());
+                    if (!elevator.inAction()) {
+                       // System.out.println(elevator.getPassengerCount());
+                        locateNewPassenger(elevator);
+                
+                        if (elevator.getDestFloor() > elevator.getCurFloor()) {
+                            elevator.updateDirection(2);
+                        } else if (elevator.getDestFloor() < elevator.getCurFloor()) {
+                            elevator.updateDirection(-2);
+                        }else{
+                            elevator.setAction(0);
+                        }
                     }
                     
-                }
-                System.out.println(elevator.getName() + " is on floor " + elevator.getCurFloor());
-            }
+                 System.out.println("ELEVATOR DEST FLOOR: " + elevator.getDestFloor());
+                    elevator.printPassengers();
+
+                    if (elevator.inAction()) {
+                        // Update position only when the elevator is in action and not already at the destination
+                        if (elevator.isAction() == 1 || elevator.isAction() == 2 ) {
+                            elevator.setCurFloor(elevator.getCurFloor() + 1);
+                        } else if (elevator.isAction() == -1 || elevator.isAction() == -2 ) {
+                            elevator.setCurFloor(elevator.getCurFloor() - 1);
+                        }
+                        System.out.println(elevator.getName() + " is on floor " + elevator.getCurFloor());
+                    }
+                    
+                
         }
+    }
+    }
     }
 }
