@@ -7,8 +7,8 @@ public class Elevator {
     private int destFloor;
     private boolean isEmpty = true;
     private static int action;
-    private static PriorityQueue<Person> minHeapGoingUp = new PriorityQueue<>(Comparator.comparing(Person::getCurFloor));
-    private static PriorityQueue<Person> maxHeapGoingDown = new PriorityQueue<>(Comparator.comparing(Person::getCurFloor).reversed());
+    private static PriorityQueue<Person> minHeapGoingUp = new PriorityQueue<>(Comparator.comparing(Person::getDestFloor));
+    private static PriorityQueue<Person> maxHeapGoingDown = new PriorityQueue<>(Comparator.comparing(Person::getDestFloor).reversed());
 
     private int passengerCount = 0;
     private int maxCapacity; // New field for maximum capacity
@@ -52,20 +52,20 @@ public class Elevator {
         if (passengerCount < maxCapacity) {
             if (passenger.getDestFloor() > passenger.getCurFloor()) {
                 minHeapGoingUp.add(passenger);
-                if (minHeapGoingUp.peek().getDestFloor() > destFloor) {
-                    destFloor = minHeapGoingUp.peek().getDestFloor();
-                }
+                destFloor = minHeapGoingUp.peek().getDestFloor();
+                System.out.println(destFloor);
+        
             } else {
                 maxHeapGoingDown.add(passenger);
-                if (maxHeapGoingDown.peek().getDestFloor() < destFloor) {
                     destFloor = maxHeapGoingDown.peek().getDestFloor();
-                }
+                
             }
             updateDirection(); // Update the direction after adding a passenger
             isEmpty = false;
             passengerCount++;
         } else {
             System.out.println("Elevator is at maximum capacity. Cannot add more passengers.");
+            System.exit(0);
         }
     }
 
