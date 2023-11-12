@@ -99,6 +99,9 @@ public class ElevatorSimulation {
     public static void pickUp(Elevator elevator) {
         int action = elevator.isAction();
        // System.out.println(action);
+        elevator.printPassengers();
+       System.out.println("What is capacity " + elevator.getPassengerCount());
+       System.out.println("if at max capacity "+ elevator.isAtMaxCapacity());
        if(!elevator.isAtMaxCapacity()){
             if (action == 1 || action == 2 || action == -2) { // Going up
                 if (!floorsQueues[elevator.getCurFloor() * 2].isEmpty()) {
