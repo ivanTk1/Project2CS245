@@ -3,7 +3,6 @@ class Person {
     private int curFloor;
     private int destFloor;
     private boolean waiting;
-    private long startTime; 
 
     public Person(String name, int curFloor, int destFloor, boolean waiting) {
         this.name = name;
@@ -44,14 +43,7 @@ class Person {
         this.waiting = waiting;
     }
 
-    public long getStartTime() {
-        return startTime;
-    }
-
-    public void setStartTime(long startTime) {
-        this.startTime = startTime;
-    }
-
+    
 
     @Override
     public String toString() {
