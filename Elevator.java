@@ -1,4 +1,6 @@
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.List;
 import java.util.PriorityQueue;
 
 public class Elevator {
@@ -6,9 +8,9 @@ public class Elevator {
     private int curFloor;
     private int destFloor;
     private boolean isEmpty = true;
-    private static int action;
-    private static PriorityQueue<Person> minHeapGoingUp = new PriorityQueue<>(Comparator.comparing(Person::getDestFloor));
-    private static PriorityQueue<Person> maxHeapGoingDown = new PriorityQueue<>(Comparator.comparing(Person::getDestFloor).reversed());
+    private int action;
+    private PriorityQueue<Person> minHeapGoingUp = new PriorityQueue<>(Comparator.comparing(Person::getDestFloor));
+    private PriorityQueue<Person> maxHeapGoingDown = new PriorityQueue<>(Comparator.comparing(Person::getDestFloor).reversed());
 
     private int passengerCount = 0;
     private int maxCapacity; // New field for maximum capacity
@@ -50,15 +52,14 @@ public class Elevator {
 
     public void addPassenger(Person passenger) {
         if (passengerCount < maxCapacity) {
+            if (isEmpty) {
+                // Update destFloor only if the elevator is empty
+                destFloor = passenger.getDestFloor();
+            }
             if (passenger.getDestFloor() > passenger.getCurFloor()) {
                 minHeapGoingUp.add(passenger);
-                destFloor = minHeapGoingUp.peek().getDestFloor();
-                System.out.println(destFloor);
-        
             } else {
                 maxHeapGoingDown.add(passenger);
-                    destFloor = maxHeapGoingDown.peek().getDestFloor();
-                
             }
             updateDirection(); // Update the direction after adding a passenger
             isEmpty = false;
@@ -68,6 +69,7 @@ public class Elevator {
             System.exit(0);
         }
     }
+    
 
 
     public boolean isAtMaxCapacity() {
@@ -77,12 +79,12 @@ public class Elevator {
     public void printPassengers() {
         System.out.println("Passengers in " + name + ":");
 
-        if (action == 1) {
+        if (action == 1 || action == 2) {
             System.out.println("Going Up:");
             for (Person passenger : minHeapGoingUp) {
                 System.out.println(passenger);
             }
-        } else {
+        } else if(action == -1 || action == -2) {
             System.out.println("Going Down:");
             for (Person passenger : maxHeapGoingDown) {
                 System.out.println(passenger);
@@ -91,6 +93,19 @@ public class Elevator {
 
         System.out.println("Total passengers: " + passengerCount);
     }
+
+    public List<Person> getPassengers() {
+        List<Person> passengers = new ArrayList<>();
+
+        if (action == 1 || action == 2) {
+            passengers.addAll(minHeapGoingUp);
+        } else if (action == -1 || action == -2) {
+            passengers.addAll(maxHeapGoingDown);
+        }
+
+        return passengers;
+    }
+
 
     public Person removePassenger() {
         Person nextPassenger = null;
@@ -112,12 +127,12 @@ public class Elevator {
 
         if (nextPassenger != null) {
             destFloor = nextPassenger.getDestFloor();
-            passengerCount--;
-         //   System.out.println(passengerCount + "     " +  destFloor);
-         //   System.out.println(isEmpty);
+            if (passengerCount > 0) {
+                passengerCount--;
+            }
             updateDirection(); // Update the direction after removing a passenger
         }
-
+    
         return nextPassenger;
     }
 
@@ -149,7 +164,7 @@ public class Elevator {
         return destFloor;
     }
 
-    public static int isAction() {
+    public int isAction() {
         return action;
     }
 
@@ -170,9 +185,7 @@ public class Elevator {
         // Check if the elevator is empty before updating the destination floor
         if (isEmpty) {
             this.destFloor = destFloor;
-        } else {
-            System.out.println("Cannot update destination floor while the elevator has passengers.");
-        }
+        } 
     }
 
     public boolean isEmpty() {
