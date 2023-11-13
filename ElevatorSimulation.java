@@ -44,20 +44,20 @@ public class ElevatorSimulation {
      * For each floor, a random number is generated, and if it is less than the configured
      * probability, a passenger is created with a random destination floor.
      */
-    public static void createPeople() {
+    public static void createPeople(int currentTick) {
         Random random = new Random();
 
         for (int i = 0; i < floorCount; i++) {
             double randomValue = random.nextDouble();
             if (randomValue < passengerAppears) {
-                int destFloor = random.nextInt(floorCount-1);
+                int destFloor = random.nextInt(floorCount - 1);
                 if (destFloor >= i) {
                     destFloor++;
                 }
                 Person passenger = new Person("passenger" + count, i, destFloor, true);
                 System.out.println(passenger.getName() + " is waiting on floor " + passenger.getCurFloor() + " going to " + passenger.getDestFloor());
                 count++;
-                passengerCreationTimes.put(passenger.getName(), System.currentTimeMillis());
+                passengerCreationTimes.put(passenger.getName(), (long) currentTick);
 
                 // Adds passengers to the correct direction
                 if (passenger.getCurFloor() > passenger.getDestFloor()) {
@@ -72,6 +72,7 @@ public class ElevatorSimulation {
             }
         }
     }
+
     /**
      * Locates the nearest waiting passenger for the given elevator. It iterates through
      * all floors, considering both up and down queues, to find the closest waiting passenger.
@@ -128,8 +129,10 @@ public class ElevatorSimulation {
      * removing them from the elevator. Additionally, it records the time taken for each passenger.
      *
      * @param elevator The elevator to drop off passengers.
+     * @param currentTick The current tick of the simulation.
+
      */
-    public static void dropOff(Elevator elevator) {
+    public static void dropOff(Elevator elevator, int currentTick) {
         // drop off going up
         if (elevator.peekNextPersonInUpHeap() != null) {
             while (elevator.peekNextPersonInUpHeap() != null && elevator.peekNextPersonInUpHeap().getDestFloor() == elevator.getCurFloor()) {
@@ -146,12 +149,16 @@ public class ElevatorSimulation {
         }
 
         for (Person passenger : elevator.getPassengers()) {
-            long creationTime = passengerCreationTimes.get(passenger.getName());
-            long currentTime = System.currentTimeMillis();
-            long timeTaken = currentTime - creationTime;
-            //System.out.println(passenger.getName() + " took " + timeTaken + " milliseconds to reach the destination.");
-            timeTakenList.add(timeTaken);  // Add the time taken to the list for later calculation
+            long creationTick = passengerCreationTimes.get(passenger.getName());
+            long ticksTaken = currentTick - creationTick;
+    
+            // Ensure that the minimum time taken by a passenger is 1 tick
+            ticksTaken = Math.max(ticksTaken, 1);
+    
+            System.out.println(passenger.getName() + " took " + ticksTaken + " ticks to reach the destination.");
+            timeTakenList.add(ticksTaken);  // Add the time taken to the list for later calculation
         }
+    
 
     }
      /**
@@ -228,10 +235,10 @@ public class ElevatorSimulation {
         // floorsQueues[5 * 2].offer(person3); 
     
         for (int i = 0; i < ticks; i++) {
-            createPeople();
+            createPeople(i);
             for (int j = 0; j < 5; j++) {
                 for (Elevator elevator : elevators) {
-                    dropOff(elevator);
+                    dropOff(elevator,i);
                     pickUp(elevator);
                     if (!elevator.inAction()) {
                         locateNewPassenger(elevator);
@@ -269,14 +276,14 @@ public class ElevatorSimulation {
             total += timeTaken;
         }
         double averageTime = (double) total / timeTakenList.size();
-        System.out.println("Average time taken by passengers: " + averageTime + " milliseconds");
+        System.out.println("Average time taken by passengers: " + averageTime + " ticks");
     
         // Find and print the longest and shortest time taken by passengers
         if (!timeTakenList.isEmpty()) {
             long longestTime = Collections.max(timeTakenList);
             long shortestTime = Collections.min(timeTakenList);
-            System.out.println("Longest time taken by a passenger: " + longestTime + " milliseconds");
-            System.out.println("Shortest time taken by a passenger: " + shortestTime + " milliseconds");
+            System.out.println("Longest time taken by a passenger: " + longestTime + " ticks");
+            System.out.println("Shortest time taken by a passenger: " + shortestTime + " ticks");
         } else {
             System.out.println("No passengers in the simulation.");
         }
