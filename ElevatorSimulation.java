@@ -1,13 +1,13 @@
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.*;
+import java.util.*; //time is by ticks
 
 public class ElevatorSimulation {
     static int floorCount = 32;
     static double passengerAppears = 0.03;
     static int numberOfElevators = 1;
     static int elevatorCapacity = 10;
-    static int ticks = 500;
+    static int ticks = 5;
     static String structures = "linked";
 
     static int count = 0;
@@ -17,6 +17,10 @@ public class ElevatorSimulation {
     static Map<String, Long> passengerCreationTimes = new HashMap<>();
     static List<Long> timeTakenList = new ArrayList<>();
 
+    /**
+     * Loads configuration properties from a file. If the file is not found or an error occurs
+     * during loading, default values are used.
+     */
     public static void loadProperties() {
         Properties prop = new Properties();
         try (FileInputStream input = new FileInputStream("config.properties")) {
@@ -35,6 +39,11 @@ public class ElevatorSimulation {
         }
     }
 
+    /**
+     * Creates people randomly based on the configured passenger appearance probability.
+     * For each floor, a random number is generated, and if it is less than the configured
+     * probability, a passenger is created with a random destination floor.
+     */
     public static void createPeople() {
         Random random = new Random();
 
@@ -63,7 +72,13 @@ public class ElevatorSimulation {
             }
         }
     }
-
+    /**
+     * Locates the nearest waiting passenger for the given elevator. It iterates through
+     * all floors, considering both up and down queues, to find the closest waiting passenger.
+     * The elevator's destination floor and direction are updated accordingly.
+     *
+     * @param elevator The elevator to locate a new passenger for.
+     */
     public static void locateNewPassenger(Elevator elevator) {
         int currentFloor = elevator.getCurFloor();
         Person closestPassenger = null;
@@ -94,33 +109,42 @@ public class ElevatorSimulation {
 
         if (closestPassenger != null) {
             closestPassenger.setWaiting(false);
+          //  System.out.println(closestPassenger.getCurFloor());
+
             elevator.setDestFloor(closestPassenger.getCurFloor());
         
             System.out.println(elevator.getName() + " is empty and going to pick up " + closestPassenger.getName() + " on floor " + elevator.getDestFloor());
         
             if (elevator.getDestFloor() > elevator.getCurFloor()) {
-                elevator.updateDirection(2);
+                elevator.updateNewDirection(2);
             } else if (elevator.getDestFloor() < elevator.getCurFloor()) {
-                elevator.updateDirection(-2);
+                elevator.updateNewDirection(-2);
             }
         }
     }
-
+    /**
+     * Handles dropping off passengers at their destination floors. It checks both up and down
+     * heaps in the elevator to see if any passengers have reached their destination floor,
+     * removing them from the elevator. Additionally, it records the time taken for each passenger.
+     *
+     * @param elevator The elevator to drop off passengers.
+     */
     public static void dropOff(Elevator elevator) {
         // drop off going up
         if (elevator.peekNextPersonInUpHeap() != null) {
-            if (elevator.peekNextPersonInUpHeap().getDestFloor() == elevator.getCurFloor()) {
+            while (elevator.peekNextPersonInUpHeap() != null && elevator.peekNextPersonInUpHeap().getDestFloor() == elevator.getCurFloor()) {
                 System.out.println(elevator.getName() + " just dropped off " + elevator.peekNextPersonInUpHeap().getName());
-                elevator.removePassenger();
+                elevator.removePassengers();
             }
         }
         // drop off going down
         if (elevator.peekNextPersonInDownHeap() != null) {
-            if (elevator.peekNextPersonInDownHeap().getDestFloor() == elevator.getCurFloor()) {
+            while (elevator.peekNextPersonInDownHeap() != null && elevator.peekNextPersonInDownHeap().getDestFloor() == elevator.getCurFloor()) {
                 System.out.println(elevator.getName() + " just dropped off " + elevator.peekNextPersonInDownHeap().getName());
-                elevator.removePassenger();
+                elevator.removePassengers();
             }
         }
+
         for (Person passenger : elevator.getPassengers()) {
             long creationTime = passengerCreationTimes.get(passenger.getName());
             long currentTime = System.currentTimeMillis();
@@ -130,7 +154,13 @@ public class ElevatorSimulation {
         }
 
     }
-
+     /**
+     * Handles picking up passengers waiting on the current floor. It checks the elevator's
+     * direction and corresponding floor queue to pick up passengers, adding them to the
+     * elevator and marking them as not waiting.
+     *
+     * @param elevator The elevator to pick up passengers.
+     */
     public static void pickUp(Elevator elevator) {
         int action = elevator.isAction();
        if(!elevator.isAtMaxCapacity()){
@@ -157,8 +187,14 @@ public class ElevatorSimulation {
         }
     }
     
-
-    
+    /**
+     * The main method that runs the elevator simulation. It initializes elevator queues,
+     * creates elevator instances, and simulates passenger creation, movement, and actions
+     * for a specified number of ticks. Finally, it calculates and prints statistics on
+     * passenger wait times.
+     *
+     * @param args Command-line arguments (not used in this simulation).
+     */
     public static void main(String[] args) {
         loadProperties();
     
@@ -166,12 +202,10 @@ public class ElevatorSimulation {
         floorsQueues = new Queue[floorCount * 2];
     
         if ("linked".equals(structures)) {
-            floorsQueues = new Queue[floorCount * 2];
             for (int i = 0; i < floorCount * 2; i++) {
                 floorsQueues[i] = new LinkedList<>();
             }
         } else if ("array".equals(structures)) {
-            floorsQueues = new Queue[floorCount * 2];
             for (int i = 0; i < floorCount * 2; i++) {
                 floorsQueues[i] = new ArrayDeque<>();
             }
@@ -184,15 +218,14 @@ public class ElevatorSimulation {
             elevators.add(elevator);
         }
     
-        // Person person1 = new Person("passenger1", 3, 10, true);
-        // Person person2 = new Person("passenger2", 4, 8, true);
-        // Person person3 = new Person("passenger2", 9, 0, true);
+        // Person person1 = new Person("passenger1", 3, 9, true);
+        // Person person2 = new Person("passenger2", 4, 9, true);
+        // Person person3 = new Person("passenger2", 5, 9, true);
     
         // Add the created people to the queues
-        // floorsQueues[3 * 2].offer(person1);  // 
-        // floorsQueues[4 * 2].offer(person2);  // Add to the up 
-        // System.out.println("PROBLEM HERE");
-        // floorsQueues[ 9* 2 + 1].offer(person3);  // Add to the up 
+        // floorsQueues[3 * 2].offer(person1);  
+        // floorsQueues[4 * 2].offer(person2);  
+        // floorsQueues[5 * 2].offer(person3); 
     
         for (int i = 0; i < ticks; i++) {
             createPeople();
@@ -204,14 +237,20 @@ public class ElevatorSimulation {
                         locateNewPassenger(elevator);
     
                         if (elevator.getDestFloor() > elevator.getCurFloor()) {
-                            elevator.updateDirection(2);
+                            elevator.updateNewDirection(2);
                         } else if (elevator.getDestFloor() < elevator.getCurFloor()) {
-                            elevator.updateDirection(-2);
+                            elevator.updateNewDirection(-2);
                         } else {
                             elevator.setAction(0);
                         }
                     }
-    
+
+                    // -2 = going down to pick up
+                    // -1 = going down to drop off
+                    //  0 = doing nothing (waiting got passanger)
+                    //  1 = going up to drop off
+                    //  2 = going up to pick up
+
                     if (elevator.inAction()) {
                         // Update position only when the elevator is in action and not already at the destination
                         if (elevator.isAction() == 1 || elevator.isAction() == 2) {
@@ -219,8 +258,9 @@ public class ElevatorSimulation {
                         } else if (elevator.isAction() == -1 || elevator.isAction() == -2) {
                             elevator.setCurFloor(elevator.getCurFloor() - 1);
                         }
-                        System.out.println(elevator.getName() + " is on floor " + elevator.getCurFloor());
                     }
+                    System.out.println(elevator.getName() + " is on floor " + elevator.getCurFloor());
+
                 }
             }
         }
