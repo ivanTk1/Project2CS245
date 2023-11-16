@@ -7,7 +7,7 @@ public class ElevatorSimulation {
     static double passengerAppears = 0.03;
     static int numberOfElevators = 1;
     static int elevatorCapacity = 10;
-    static int ticks = 5;
+    static int ticks = 300;
     static String structures = "linked";
 
     static int count = 0;
